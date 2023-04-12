@@ -1,0 +1,82 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+    - 5672:5672
+    - 15672:15672
+    env_file:
+      - .development.env
+
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+      target: development
+    env_file:
+      - .development.env
+
+    ports:
+      - ${PORT}:${PORT}
+
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+    depends_on:
+      - rabbitmq
+      - postgres
+
+    restart: always
+    command: npm run start:dev api
+  auth:
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+      target: development
+    env_file:
+      - .development.env
+
+    depends_on:
+      - rabbitmq
+      - postgres
+      - profile
+      - api
+
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev auth
+
+  profile:
+    build:
+      context: .
+      dockerfile: ./apps/profile/Dockerfile
+      target: development
+
+    env_file:
+      - .development.env
+
+    depends_on:
+      - rabbitmq
+      - postgres
+      - api
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    command: npm run start:dev profile
+
+  postgres:
+    image: postgres
+    env_file:
+      - .development.env
+    
+    ports:
+      - 5432:5432
+
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
