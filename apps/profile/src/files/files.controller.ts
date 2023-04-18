@@ -13,13 +13,6 @@ export class FilesController {
   addImageAsPreview(@Payload() image: Buffer): Promise<string> {
     return this.filesService.addImageAsPreview(image);
   }
-
-  //bind image to essence
-  @MessagePattern({ cmd: 'bind-image-to-essence'})
-  bindImageToEssence(@Payload() fileDto: FileDto): Promise<Files> {
-    return this.filesService.bindImageToEssence(fileDto);
-  }
-
   
   @MessagePattern({ cmd: 'clean-preview-folder' })
   cleanPreviewFolder() {

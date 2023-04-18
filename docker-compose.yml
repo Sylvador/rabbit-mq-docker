@@ -29,10 +29,9 @@ services:
 
     depends_on:
       - rabbitmq
-      - postgres
 
-    restart: always
     command: npm run start:dev api
+
   auth:
     build:
       context: .
@@ -41,15 +40,23 @@ services:
     env_file:
       - .development.env
 
+
+    networks:
+      - postgres_auth
+
+    links:
+      - postgres_auth
+
     depends_on:
       - rabbitmq
-      - postgres
+      - postgres_auth
       - profile
       - api
 
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+
     command: npm run start:dev auth
 
   profile:
@@ -61,22 +68,55 @@ services:
     env_file:
       - .development.env
 
+    networks:
+      - postgres_profile
+
     depends_on:
       - rabbitmq
-      - postgres
+      - postgres_profile
       - api
+
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+
     command: npm run start:dev profile
 
-  postgres:
+  postgres_auth:
     image: postgres
+    container_name: postgres_auth
     env_file:
       - .development.env
-    
+
+    networks:
+      - postgres_auth
     ports:
       - 5432:5432
 
     volumes:
-      - ./db/data:/var/lib/postgresql/data
+      - ./initdb.d/auth.initdb.sql:/docker-entrypoint-initdb.d/auth.initdb.sql
+      - ./auth_db/data:/var/lib/postgresql/data
+
+  postgres_profile:
+    image: postgres
+    container_name: postgres_profile
+
+    env_file:
+      - .development.env
+    
+    networks:
+      - postgres_profile
+    ports:
+      - 5431:5432
+
+    volumes:
+      - ./initdb.d/profile.initdb.sql:/docker-entrypoint-initdb.d/profile.initdb.sql
+      - ./profile_db/data:/var/lib/postgresql/data
+
+volumes:
+  auth_db:
+  profile_db:
+
+networks:
+  postgres_profile:
+  postgres_auth:

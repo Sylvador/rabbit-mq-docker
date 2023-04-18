@@ -9,12 +9,12 @@ import { Observable, catchError, firstValueFrom, map } from 'rxjs';
 import { AuthDto } from '../../auth/src/dto/auth.dto';
 import { UpdateProfileDto } from '../../profile/src/dto/update-profile.dto';
 import { ProfileUpdateGuard } from './guards/profile-update.guard';
-import { AddRoleDto, CreateRoleDto } from '../../profile/src/roles/dto';
 import { RolesGuard } from './guards/roles.guard';
 import { Files } from '../../profile/src/files/files.model';
 import { FileDto } from '../../profile/src/files/dto/file.dto';
 import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions';
 import { CreateProfileDto } from '../../profile/src/dto/create-profile.dto';
+import { AddRoleDto, CreateRoleDto } from 'apps/auth/src/roles/dto';
 
 @UseGuards(AtGuard)
 @Controller('api')
@@ -95,13 +95,13 @@ export class ApiController {
   @Roles('ADMIN')
   @UseGuards(RolesGuard)
   createRole(@Body() dto: CreateRoleDto) {
-    return this.profileClient.send({ cmd: 'create-role' }, dto);
+    return this.authClient.send({ cmd: 'create-role' }, dto);
   }
 
   @ApiOperation({ summary: 'Получить роль по названию' })
   @Get('roles/:value')
   getByValue(@Param('value') value: string) {
-    return this.profileClient.send({ cmd: 'get-role-by-value' }, value);
+    return this.authClient.send({ cmd: 'get-role-by-value' }, value);
   }
 
   @ApiOperation({ summary: 'Выдать роль' })
@@ -111,7 +111,7 @@ export class ApiController {
   @UseGuards(RolesGuard)
   @Post('roles/giverole')
   giveRole(@Body() dto: AddRoleDto) {
-    return this.profileClient.send({ cmd: 'give-role'}, dto);
+    return this.authClient.send({ cmd: 'give-role'}, dto);
   }
 
   //add image as preview, return file's full path

@@ -6,13 +6,10 @@ import { AuthModule } from 'apps/auth/src/auth.module';
 import { FilesModule } from './files/files.module';
 import { ConfigModule } from '@nestjs/config';
 import { Profile } from '@app/common/database/profile.model';
-import { Role } from '@app/common/database/roles.model';
-import { UserRoles } from '@app/common/database/user-roles.model';
-import { User } from '@app/common/database/user.model';
-import { RolesModule } from './roles/roles.module';
 import { SharedModule } from '@app/common/rmq/shared.module';
 import { APP_FILTER } from '@nestjs/core';
 import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions';
+import { Files } from './files/files.model';
 
 @Module({
   controllers: [ProfileController],
@@ -28,19 +25,19 @@ import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions';
       isGlobal: true,
     }),
     SequelizeModule.forRoot({
+      name: 'profile',
       dialect: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: +process.env.POSTGRES_PORT,
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      models: [User, Role, UserRoles, Profile],
+      host: '',
+      port: 5432,
+      username: 'postgres',
+      password: 'rootroot',
+      database: 'nestjwtprofile',
+      models: [Profile, Files],
       autoLoadModels: true,
     }),
-    SequelizeModule.forFeature([Profile]),
+    SequelizeModule.forFeature([Profile, Files], 'profile'),
     AuthModule,
     FilesModule,
-    RolesModule,
     SharedModule.registerRmq('PROFILE_SERVICE', 'profile_queue'),
     SharedModule.registerRmq('AUTH_SERVICE', 'auth_queue'),
   ],

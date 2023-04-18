@@ -12,7 +12,7 @@ RUN npm run build auth
 
 FROM node:16.17.0-alpine AS production
 
-ARG NODE_ENV=production
+ARG NODE_ENV=development
 ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /usr/src/app
